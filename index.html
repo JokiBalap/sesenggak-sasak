@@ -223,6 +223,7 @@
     .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 13px; align-items: center; }
     .mini { padding: 8px 10px; font-size: 13px; border-radius: 999px; }
     .liked { background: var(--accent) !important; color: white !important; }
+    .disliked { background: #344054 !important; color: white !important; }
     .comments { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 8px; }
     .comment { background: #fbf6ed; padding: 9px 11px; border-radius: 14px; font-size: 14px; }
     .comment-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
@@ -343,6 +344,7 @@
     const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Ax3bgECT91TG6f4xSsTHOlJdRgMeATjZxUsTSsbIfPQ/gviz/tq?tqx=out:csv&sheet=Sesenggak';
     const STORAGE_KEY = 'sesenggak-news-posts-v1';
     const LIKE_KEY = 'sesenggak-news-likes-v1';
+    const DISLIKE_KEY = 'sesenggak-news-dislikes-v1';
     const COMMENT_KEY = 'sesenggak-news-comments-v1';
     const VISITOR_NAME_KEY = 'sesenggak-news-visitor-name-v1';
     const USER_ID_KEY = 'sesenggak-news-user-id-v1';
@@ -355,6 +357,7 @@
     let sheetPosts = [];
     let localPosts = [];
     let likes = {};
+    let dislikes = {};
     let comments = {};
     let currentFilter = 'semua';
     let currentImage = '';
@@ -396,6 +399,7 @@
     function loadState() {
       localPosts = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
       likes = JSON.parse(localStorage.getItem(LIKE_KEY) || '{}');
+      dislikes = JSON.parse(localStorage.getItem(DISLIKE_KEY) || '{}');
       comments = JSON.parse(localStorage.getItem(COMMENT_KEY) || '{}');
       visitorName = localStorage.getItem(VISITOR_NAME_KEY) || '';
       currentUserId = localStorage.getItem(USER_ID_KEY) || ('visitor-' + Date.now() + '-' + Math.random().toString(36).slice(2));
@@ -408,6 +412,7 @@
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(localPosts));
       localStorage.setItem(LIKE_KEY, JSON.stringify(likes));
+      localStorage.setItem(DISLIKE_KEY, JSON.stringify(dislikes));
       localStorage.setItem(COMMENT_KEY, JSON.stringify(comments));
       localStorage.setItem(VISITOR_NAME_KEY, visitorName);
       localStorage.setItem(USER_ID_KEY, currentUserId);
@@ -463,7 +468,8 @@
 
     function manageButtons(post) {
       if (!canManagePost(post)) return '';
-      return `<div class="actions"><button class="mini ghost" onclick="editPost('${post.id}')">Edit</button><button class="mini danger" onclick="deletePost('${post.id}')">Hapus</button></div>`;
+      const ownerLabel = isAdmin ? 'Admin bisa mengelola semua upload lokal.' : 'Anda pemilik upload ini.';
+      return `<div class="actions" title="${ownerLabel}"><button class="mini ghost" onclick="editPost('${post.id}')">Edit</button><button class="mini danger" onclick="deletePost('${post.id}')">Hapus</button></div>`;
     }
 
     async function loadSheet() {
@@ -519,6 +525,7 @@
 
     function postTemplate(post) {
       const likeCount = Number(post.likeCount || 0) + (likes[post.id] ? 1 : 0);
+      const dislikeCount = Number(post.dislikeCount || 0) + (dislikes[post.id] ? 1 : 0);
       const comms = comments[post.id] || [];
       const role = post.role === 'admin' ? 'admin' : 'visitor';
       const roleLabel = role === 'admin' ? 'ADMIN' : 'PENGUNJUNG';
@@ -540,6 +547,7 @@
             <p>${escapeHtml(post.body)}</p>
             <div class="actions">
               <button class="mini ghost ${likes[post.id] ? 'liked' : ''}" onclick="toggleLike('${post.id}')">♥ ${likeCount} Like</button>
+              <button class="mini ghost ${dislikes[post.id] ? 'disliked' : ''}" onclick="toggleDislike('${post.id}')">👎 ${dislikeCount} Tidak suka</button>
               <button class="mini ghost" onclick="sharePost('${post.id}')">Bagikan</button>
             </div>
             <div class="comments">
@@ -588,6 +596,7 @@
         video: currentVideo || (!currentVideoFile ? (old.video || '') : ''),
         videoKey: savedVideoKey,
         likeCount: old.likeCount || 0,
+        dislikeCount: old.dislikeCount || 0,
         createdAt: old.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -681,6 +690,7 @@
       localPosts = localPosts.filter(p => p.id !== id);
       if (post.videoKey) deleteVideoBlob(post.videoKey);
       delete likes[id];
+      delete dislikes[id];
       delete comments[id];
       saveState();
       render();
@@ -689,6 +699,15 @@
     function toggleLike(id) {
       likes[id] = !likes[id];
       if (!likes[id]) delete likes[id];
+      if (likes[id]) delete dislikes[id];
+      saveState();
+      render();
+    }
+
+    function toggleDislike(id) {
+      dislikes[id] = !dislikes[id];
+      if (!dislikes[id]) delete dislikes[id];
+      if (dislikes[id]) delete likes[id];
       saveState();
       render();
     }
@@ -974,7 +993,7 @@
       }
       if (!confirm('Hapus semua unggahan lokal di browser ini?')) return;
       clearAllVideoBlobs();
-      localPosts = []; likes = {}; comments = {}; saveState(); render();
+      localPosts = []; likes = {}; dislikes = {}; comments = {}; saveState(); render();
     });
     el.cancelEdit.addEventListener('click', resetForm);
     el.search.addEventListener('input', render);
