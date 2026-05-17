@@ -1,8 +1,8 @@
 # Sesenggak Sasak
 
-Website publik sederhana untuk menampilkan kumpulan Sesenggak Sasak.
+Website publik bergaya media komunitas / Instagram-news untuk menampilkan Sesenggak Sasak, berita, foto, like, komentar, edit postingan, dan unggahan gambar.
 
-Data utama disimpan di Google Sheets dan dibaca langsung oleh frontend statis melalui endpoint CSV publik Google Sheets. Cara ini tidak membutuhkan Google Apps Script, cocok jika OAuth/otorisasi Apps Script diblokir.
+Data Sesenggak utama tetap dibaca dari Google Sheets melalui endpoint CSV publik. Fitur upload foto, edit, like, dan komentar pada versi GitHub Pages ini berjalan sebagai prototype lokal memakai localStorage browser. Artinya unggahan pengunjung tersimpan di perangkat masing-masing, bukan database publik bersama. Untuk membuat upload benar-benar publik untuk semua orang, perlu backend seperti Firebase, Supabase, atau server Express + storage gambar.
 
 ## Struktur Google Sheets
 
@@ -18,8 +18,24 @@ Header baris pertama:
 
 ## File penting
 
-- `index.html`: frontend website.
-- `appsscript/Code.gs`: kode Google Apps Script API.
+- `index.html`: frontend website bergaya Instagram/news dengan upload gambar, edit, like, komentar, pencarian, filter, dan integrasi Google Sheets.
+- `appsscript/Code.gs`: arsip kode Google Apps Script API jika suatu saat ingin memakai Apps Script.
+
+## Fitur website
+
+- Beranda feed seperti media sosial.
+- Upload foto / berita dari browser.
+- Preview gambar sebelum simpan.
+- Edit dan hapus postingan lokal.
+- Like postingan.
+- Komentar postingan.
+- Tombol bagikan.
+- Filter: Semua, Berita, Foto, Sesenggak, Disukai.
+- Pencarian konten.
+- Trending sidebar.
+- Statistik postingan, like, dan jumlah data sheet.
+
+Catatan: fitur upload/like/komentar pada GitHub Pages bersifat lokal per browser. Untuk database publik bersama dibutuhkan backend.
 
 ## Langkah setup singkat
 

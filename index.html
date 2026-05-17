@@ -3,355 +3,638 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sesenggak Sasak</title>
-  <meta name="description" content="Kumpulan sesenggak, peribahasa, pepatah, dan petuah Sasak.">
+  <title>Sesenggak Sasak News</title>
+  <meta name="description" content="Media komunitas Sesenggak Sasak: berita, foto, cerita, like, komentar, dan unggahan lokal.">
   <style>
     :root {
-      --bg: #f7f3ea;
+      --bg: #faf7f1;
       --card: #ffffff;
-      --text: #2d2418;
-      --muted: #6f604e;
+      --text: #211a13;
+      --muted: #766858;
+      --line: #eadfce;
       --primary: #7a4f24;
-      --primary-dark: #5f3d1b;
-      --chip: #efe2cc;
-      --border: #c9b99c;
+      --primary-dark: #5b3717;
+      --accent: #d9466b;
+      --soft: #f3e7d5;
+      --shadow: 0 12px 34px rgba(62, 40, 20, .12);
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
+      margin: 0;
       font-family: Arial, Helvetica, sans-serif;
       background: var(--bg);
-      margin: 0;
-      padding: 24px;
       color: var(--text);
       line-height: 1.5;
     }
 
-    .container {
-      max-width: 960px;
+    .app {
+      max-width: 1180px;
       margin: 0 auto;
+      padding: 18px;
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 28px;
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(250, 247, 241, .94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
     }
 
-    h1 {
-      margin: 0 0 8px;
-      font-size: clamp(32px, 6vw, 56px);
-      color: #4b2f15;
-    }
-
-    .subtitle {
-      margin: 0;
-      color: var(--muted);
-      font-size: 17px;
-    }
-
-    .toolbar {
+    .topbar-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 12px 18px;
       display: grid;
-      grid-template-columns: 1fr auto auto;
+      grid-template-columns: auto 1fr auto;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
       gap: 10px;
-      margin-bottom: 18px;
+      font-weight: 900;
+      color: var(--primary-dark);
+      letter-spacing: -.4px;
     }
 
-    input, select, button {
-      font-size: 16px;
-      border-radius: 10px;
+    .logo {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      color: white;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      box-shadow: 0 8px 18px rgba(122, 79, 36, .2);
     }
 
-    input, select {
-      padding: 12px 14px;
-      border: 1px solid var(--border);
+    .searchbar input, input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
       background: white;
       color: var(--text);
-      width: 100%;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 15px;
+      outline: none;
     }
 
-    button {
-      padding: 12px 18px;
+    textarea { min-height: 110px; resize: vertical; }
+    input:focus, textarea:focus, select:focus { border-color: var(--primary); }
+
+    .nav {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    button, .btn {
       border: 0;
+      border-radius: 14px;
       background: var(--primary);
       color: white;
+      padding: 11px 15px;
       cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
       white-space: nowrap;
     }
 
-    button:hover {
-      background: var(--primary-dark);
-    }
+    button:hover, .btn:hover { background: var(--primary-dark); }
+    .ghost { background: white; color: var(--primary); border: 1px solid var(--line); }
+    .ghost:hover { background: var(--soft); color: var(--primary-dark); }
+    .danger { background: #b42318; }
+    .danger:hover { background: #8f1b13; }
 
-    .status {
-      text-align: center;
-      color: var(--muted);
-      margin: 18px 0;
-    }
-
-    .grid {
+    .hero {
+      margin: 22px 0;
+      padding: 28px;
+      border-radius: 28px;
+      background: radial-gradient(circle at 20% 20%, #ffe2b8 0, transparent 28%), linear-gradient(135deg, #fff, #f1dfc2);
+      box-shadow: var(--shadow);
       display: grid;
-      gap: 16px;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 22px;
+      align-items: center;
     }
 
-    .card {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-      border: 1px solid rgba(122, 79, 36, 0.08);
+    h1 { margin: 0 0 8px; font-size: clamp(30px, 5vw, 58px); line-height: 1.05; }
+    h2 { margin: 0 0 14px; }
+    .muted { color: var(--muted); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 18px;
     }
 
-    .sesenggak {
-      font-size: 23px;
-      font-weight: 700;
-      color: #4b2f15;
-      margin-bottom: 10px;
-    }
-
-    .line {
-      margin: 6px 0;
-    }
-
-    .label {
-      font-weight: 700;
-    }
-
-    .kategori {
-      display: inline-block;
-      margin-top: 12px;
-      padding: 5px 11px;
-      background: var(--chip);
-      border-radius: 999px;
-      font-size: 13px;
-      color: #6b471f;
-    }
-
-    footer {
+    .stat {
+      background: rgba(255,255,255,.74);
+      border: 1px solid rgba(255,255,255,.8);
+      padding: 14px;
+      border-radius: 18px;
       text-align: center;
-      margin-top: 36px;
-      color: var(--muted);
-      font-size: 14px;
+    }
+    .stat strong { display: block; font-size: 24px; color: var(--primary-dark); }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 20px;
+      align-items: start;
     }
 
-    @media (max-width: 720px) {
-      body {
-        padding: 16px;
-      }
+    .panel, .post, .composer {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
 
-      .toolbar {
-        grid-template-columns: 1fr;
-      }
+    .panel, .composer { padding: 18px; }
 
-      button {
-        width: 100%;
-      }
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tab.active { background: var(--primary-dark); color: white; }
+
+    .composer { margin-bottom: 18px; }
+    .form-grid { display: grid; gap: 12px; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .preview {
+      width: 100%;
+      max-height: 360px;
+      object-fit: cover;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      display: none;
+    }
+
+    .feed { display: grid; gap: 18px; }
+    .post { overflow: hidden; }
+    .post-head {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    .profile { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white; display: grid; place-items: center; font-weight: 900;
+      flex: 0 0 auto;
+    }
+    .profile b, .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+    .post img.cover { width: 100%; display: block; max-height: 620px; object-fit: cover; background: var(--soft); }
+    .post-body { padding: 15px 16px 17px; }
+    .headline { font-size: 22px; font-weight: 900; margin: 0 0 6px; color: var(--primary-dark); }
+    .chip { display: inline-flex; border-radius: 999px; background: var(--soft); color: var(--primary-dark); padding: 4px 10px; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 13px; align-items: center; }
+    .mini { padding: 8px 10px; font-size: 13px; border-radius: 999px; }
+    .liked { background: var(--accent) !important; color: white !important; }
+    .comments { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 8px; }
+    .comment { background: #fbf6ed; padding: 9px 11px; border-radius: 14px; font-size: 14px; }
+    .comment-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+
+    .side-list { display: grid; gap: 10px; }
+    .side-item { padding: 12px; border: 1px solid var(--line); border-radius: 16px; background: #fffaf3; }
+    .side-item b { color: var(--primary-dark); }
+
+    .empty { text-align: center; padding: 30px; color: var(--muted); border: 1px dashed var(--line); border-radius: 18px; background: white; }
+
+    footer { text-align: center; color: var(--muted); padding: 32px 0 20px; font-size: 14px; }
+
+    @media (max-width: 880px) {
+      .topbar-inner { grid-template-columns: 1fr; }
+      .nav { justify-content: flex-start; }
+      .hero, .layout, .two { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <main class="container">
-    <header>
-      <h1>Sesenggak Sasak</h1>
-      <p class="subtitle">Kumpulan peribahasa, pepatah, dan petuah Sasak</p>
-    </header>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><div class="logo">SS</div><div>Sesenggak News</div></div>
+      <div class="searchbar"><input id="searchInput" type="search" placeholder="Cari berita, foto, sesenggak, kategori..." autocomplete="off"></div>
+      <nav class="nav">
+        <button class="ghost" data-filter="semua">Beranda</button>
+        <button class="ghost" data-filter="berita">Berita</button>
+        <button class="ghost" data-filter="foto">Foto</button>
+        <button id="toUpload" type="button">+ Upload</button>
+      </nav>
+    </div>
+  </div>
 
-    <section class="toolbar" aria-label="Pencarian sesenggak">
-      <input id="searchInput" type="search" placeholder="Cari sesenggak, arti, makna, kategori..." autocomplete="off">
-      <button id="searchButton" type="button">Cari</button>
-      <button id="randomButton" type="button">Acak</button>
+  <main class="app">
+    <section class="hero">
+      <div>
+        <h1>Media komunitas Sesenggak Sasak</h1>
+        <p class="muted">Tampilan dibuat seperti gabungan Instagram dan website berita: bisa unggah foto, tulis berita, edit postingan, like, komentar, cari konten, dan ambil data Sesenggak dari Google Sheets.</p>
+        <div class="actions">
+          <button id="randomButton" type="button">Acak Sesenggak</button>
+          <button id="clearLocalButton" class="ghost" type="button">Reset unggahan lokal</button>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><strong id="statPosts">0</strong><span>Postingan</span></div>
+        <div class="stat"><strong id="statLikes">0</strong><span>Like</span></div>
+        <div class="stat"><strong id="statSheet">0</strong><span>Data Sheet</span></div>
+      </div>
     </section>
 
-    <div id="status" class="status">Memuat data...</div>
-    <section id="list" class="grid" aria-live="polite"></section>
+    <section class="layout">
+      <div>
+        <section id="uploadPanel" class="composer">
+          <h2 id="formTitle">Upload berita / foto</h2>
+          <p class="muted">Untuk GitHub Pages, unggahan ini tersimpan di browser pengguna masing-masing (localStorage). Agar semua pengunjung bisa melihat upload publik yang sama, nanti perlu backend seperti Firebase/Supabase/Cloudinary.</p>
+          <form id="postForm" class="form-grid">
+            <input id="editId" type="hidden">
+            <div class="two">
+              <input id="authorInput" placeholder="Nama penulis" value="Admin Sesenggak">
+              <select id="typeInput">
+                <option value="berita">Berita</option>
+                <option value="foto">Foto</option>
+                <option value="sesenggak">Sesenggak</option>
+              </select>
+            </div>
+            <input id="titleInput" required placeholder="Judul postingan / headline">
+            <textarea id="bodyInput" required placeholder="Tulis isi berita, cerita foto, atau keterangan postingan..."></textarea>
+            <input id="imageInput" type="file" accept="image/*">
+            <img id="imagePreview" class="preview" alt="Preview gambar">
+            <div class="actions">
+              <button type="submit">Simpan postingan</button>
+              <button id="cancelEditButton" class="ghost" type="button" style="display:none">Batal edit</button>
+            </div>
+          </form>
+        </section>
 
-    <footer>
-      Data dimuat langsung dari Google Sheets.
-    </footer>
+        <div class="tabs">
+          <button class="tab active ghost" data-filter="semua">Semua</button>
+          <button class="tab ghost" data-filter="berita">Berita</button>
+          <button class="tab ghost" data-filter="foto">Foto</button>
+          <button class="tab ghost" data-filter="sesenggak">Sesenggak</button>
+          <button class="tab ghost" data-filter="disukai">Disukai</button>
+        </div>
+
+        <div id="status" class="muted">Memuat data...</div>
+        <section id="feed" class="feed" aria-live="polite"></section>
+      </div>
+
+      <aside class="panel">
+        <h2>Trending</h2>
+        <div id="trending" class="side-list"></div>
+        <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+        <h2>Panduan data</h2>
+        <div class="side-list">
+          <div class="side-item"><b>Google Sheets</b><br><span class="muted">Sesenggak lama tetap dibaca dari sheet.</span></div>
+          <div class="side-item"><b>Upload foto</b><br><span class="muted">Mode demo lokal di browser. Aman untuk prototype.</span></div>
+          <div class="side-item"><b>Like & komentar</b><br><span class="muted">Tersimpan di perangkat pengunjung masing-masing.</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <footer>Sesenggak News - prototype publik berbasis GitHub Pages + Google Sheets</footer>
   </main>
 
   <script>
     const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Ax3bgECT91TG6f4xSsTHOlJdRgMeATjZxUsTSsbIfPQ/gviz/tq?tqx=out:csv&sheet=Sesenggak';
-    let semuaData = [];
+    const STORAGE_KEY = 'sesenggak-news-posts-v1';
+    const LIKE_KEY = 'sesenggak-news-likes-v1';
+    const COMMENT_KEY = 'sesenggak-news-comments-v1';
 
-    const elements = {
-      searchInput: document.getElementById('searchInput'),
-      searchButton: document.getElementById('searchButton'),
-      randomButton: document.getElementById('randomButton'),
+    let sheetPosts = [];
+    let localPosts = [];
+    let likes = {};
+    let comments = {};
+    let currentFilter = 'semua';
+    let currentImage = '';
+
+    const el = {
+      search: document.getElementById('searchInput'),
+      feed: document.getElementById('feed'),
       status: document.getElementById('status'),
-      list: document.getElementById('list')
+      postForm: document.getElementById('postForm'),
+      editId: document.getElementById('editId'),
+      author: document.getElementById('authorInput'),
+      type: document.getElementById('typeInput'),
+      title: document.getElementById('titleInput'),
+      body: document.getElementById('bodyInput'),
+      image: document.getElementById('imageInput'),
+      preview: document.getElementById('imagePreview'),
+      formTitle: document.getElementById('formTitle'),
+      cancelEdit: document.getElementById('cancelEditButton'),
+      uploadPanel: document.getElementById('uploadPanel'),
+      statPosts: document.getElementById('statPosts'),
+      statLikes: document.getElementById('statLikes'),
+      statSheet: document.getElementById('statSheet'),
+      trending: document.getElementById('trending')
     };
 
-    async function muatSheet() {
-      elements.status.textContent = 'Memuat data dari Google Sheets...';
-      elements.list.innerHTML = '';
-
-      try {
-        const response = await fetch(SHEET_CSV_URL + '&_=' + Date.now());
-
-        if (!response.ok) {
-          throw new Error('Google Sheets belum bisa dibaca publik. Aktifkan Share: Anyone with the link Viewer.');
-        }
-
-        const csvText = await response.text();
-        semuaData = csvKeObjek(csvText)
-          .filter(item => String(item.aktif).toLowerCase() === 'true');
-
-        tampilkanData(semuaData);
-      } catch (error) {
-        elements.status.textContent = 'Gagal memuat data: ' + error.message;
-      }
+    function loadState() {
+      localPosts = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      likes = JSON.parse(localStorage.getItem(LIKE_KEY) || '{}');
+      comments = JSON.parse(localStorage.getItem(COMMENT_KEY) || '{}');
     }
 
-    function cariData() {
-      const q = elements.searchInput.value.trim().toLowerCase();
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(localPosts));
+      localStorage.setItem(LIKE_KEY, JSON.stringify(likes));
+      localStorage.setItem(COMMENT_KEY, JSON.stringify(comments));
+    }
 
-      if (!q) {
-        tampilkanData(semuaData);
-        return;
+    async function loadSheet() {
+      el.status.textContent = 'Memuat data dari Google Sheets...';
+      try {
+        const response = await fetch(SHEET_CSV_URL + '&_=' + Date.now());
+        if (!response.ok) throw new Error('Google Sheets belum publik. Aktifkan Share: Anyone with the link Viewer.');
+        const csvText = await response.text();
+        sheetPosts = csvToObjects(csvText)
+          .filter(item => String(item.aktif).toLowerCase() === 'true')
+          .map(item => ({
+            id: 'sheet-' + (item.id || slug(item.sesenggak)),
+            source: 'sheet',
+            type: 'sesenggak',
+            author: item.sumber || 'Google Sheets',
+            title: item.sesenggak || 'Sesenggak Sasak',
+            body: [item.arti, item.makna].filter(Boolean).join(' - '),
+            category: item.kategori || 'sesenggak',
+            image: '',
+            createdAt: new Date().toISOString()
+          }));
+      } catch (error) {
+        el.status.textContent = 'Catatan: ' + error.message;
+        sheetPosts = [];
+      }
+      render();
+    }
+
+    function allPosts() {
+      return [...localPosts, ...sheetPosts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+
+    function render() {
+      const q = el.search.value.trim().toLowerCase();
+      let posts = allPosts();
+
+      if (currentFilter !== 'semua') {
+        if (currentFilter === 'disukai') posts = posts.filter(post => likes[post.id]);
+        else posts = posts.filter(post => post.type === currentFilter || post.category === currentFilter);
       }
 
-      const hasil = semuaData.filter(item => {
-        const gabungan = [
-          item.sesenggak,
-          item.arti,
-          item.makna,
-          item.kategori,
-          item.sumber
-        ].join(' ').toLowerCase();
+      if (q) {
+        posts = posts.filter(post => [post.title, post.body, post.author, post.type, post.category].join(' ').toLowerCase().includes(q));
+      }
 
-        return gabungan.includes(q);
-      });
+      el.status.textContent = posts.length ? 'Menampilkan ' + posts.length + ' postingan.' : 'Belum ada postingan yang cocok.';
+      el.feed.innerHTML = posts.length ? posts.map(postTemplate).join('') : '<div class="empty">Belum ada data. Upload foto/berita baru atau cek Google Sheets.</div>';
+      renderStats();
+      renderTrending();
+    }
 
-      tampilkanData(hasil);
+    function postTemplate(post) {
+      const likeCount = Number(post.likeCount || 0) + (likes[post.id] ? 1 : 0);
+      const comms = comments[post.id] || [];
+      const canEdit = post.source !== 'sheet';
+      return `
+        <article class="post" data-id="${escapeHtml(post.id)}">
+          <div class="post-head">
+            <div class="profile">
+              <div class="avatar">${escapeHtml((post.author || 'A').slice(0, 1).toUpperCase())}</div>
+              <div class="truncate"><b>${escapeHtml(post.author || 'Anonim')}</b><span class="muted">${formatDate(post.createdAt)} - ${escapeHtml(post.type)}</span></div>
+            </div>
+            ${canEdit ? `<div class="actions"><button class="mini ghost" onclick="editPost('${post.id}')">Edit</button><button class="mini danger" onclick="deletePost('${post.id}')">Hapus</button></div>` : ''}
+          </div>
+          ${post.image ? `<img class="cover" src="${post.image}" alt="${escapeHtml(post.title)}">` : ''}
+          <div class="post-body">
+            <span class="chip">${escapeHtml(post.category || post.type)}</span>
+            <h3 class="headline">${escapeHtml(post.title)}</h3>
+            <p>${escapeHtml(post.body)}</p>
+            <div class="actions">
+              <button class="mini ghost ${likes[post.id] ? 'liked' : ''}" onclick="toggleLike('${post.id}')">♥ ${likeCount} Like</button>
+              <button class="mini ghost" onclick="sharePost('${post.id}')">Bagikan</button>
+            </div>
+            <div class="comments">
+              ${comms.slice(-3).map(c => `<div class="comment"><b>${escapeHtml(c.name)}:</b> ${escapeHtml(c.text)}</div>`).join('')}
+              <div class="comment-form">
+                <input id="comment-${escapeHtml(post.id)}" placeholder="Tulis komentar...">
+                <button class="mini" onclick="addComment('${post.id}')">Kirim</button>
+              </div>
+            </div>
+          </div>
+        </article>`;
+    }
+
+    el.postForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      const id = el.editId.value || 'local-' + Date.now();
+      const old = localPosts.find(p => p.id === id) || {};
+      const post = {
+        id,
+        source: 'local',
+        type: el.type.value,
+        author: el.author.value.trim() || 'Anonim',
+        title: el.title.value.trim(),
+        body: el.body.value.trim(),
+        category: el.type.value,
+        image: currentImage || old.image || '',
+        likeCount: old.likeCount || 0,
+        createdAt: old.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      if (el.editId.value) localPosts = localPosts.map(p => p.id === id ? post : p);
+      else localPosts.unshift(post);
+
+      saveState();
+      resetForm();
+      render();
+    });
+
+    el.image.addEventListener('change', async () => {
+      const file = el.image.files && el.image.files[0];
+      if (!file) return;
+      currentImage = await compressImage(file, 1280, .78);
+      el.preview.src = currentImage;
+      el.preview.style.display = 'block';
+    });
+
+    function editPost(id) {
+      const post = localPosts.find(p => p.id === id);
+      if (!post) return;
+      el.editId.value = post.id;
+      el.author.value = post.author;
+      el.type.value = post.type;
+      el.title.value = post.title;
+      el.body.value = post.body;
+      currentImage = post.image || '';
+      el.preview.src = currentImage;
+      el.preview.style.display = currentImage ? 'block' : 'none';
+      el.formTitle.textContent = 'Edit postingan';
+      el.cancelEdit.style.display = 'inline-flex';
+      el.uploadPanel.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function deletePost(id) {
+      if (!confirm('Hapus postingan ini?')) return;
+      localPosts = localPosts.filter(p => p.id !== id);
+      delete likes[id];
+      delete comments[id];
+      saveState();
+      render();
+    }
+
+    function toggleLike(id) {
+      likes[id] = !likes[id];
+      if (!likes[id]) delete likes[id];
+      saveState();
+      render();
+    }
+
+    function addComment(id) {
+      const input = document.getElementById('comment-' + id);
+      const text = input.value.trim();
+      if (!text) return;
+      comments[id] = comments[id] || [];
+      comments[id].push({ name: 'Pengunjung', text, at: new Date().toISOString() });
+      input.value = '';
+      saveState();
+      render();
+    }
+
+    function sharePost(id) {
+      const post = allPosts().find(p => p.id === id);
+      const text = post ? post.title + ' - Sesenggak News' : 'Sesenggak News';
+      if (navigator.share) navigator.share({ title: text, text, url: location.href });
+      else navigator.clipboard.writeText(location.href).then(() => alert('Link website disalin.'));
+    }
+
+    function resetForm() {
+      el.postForm.reset();
+      el.author.value = 'Admin Sesenggak';
+      el.editId.value = '';
+      currentImage = '';
+      el.preview.removeAttribute('src');
+      el.preview.style.display = 'none';
+      el.formTitle.textContent = 'Upload berita / foto';
+      el.cancelEdit.style.display = 'none';
+    }
+
+    function renderStats() {
+      const posts = allPosts();
+      el.statPosts.textContent = posts.length;
+      el.statLikes.textContent = Object.keys(likes).length;
+      el.statSheet.textContent = sheetPosts.length;
+    }
+
+    function renderTrending() {
+      const posts = allPosts().slice(0, 5);
+      el.trending.innerHTML = posts.length ? posts.map(p => `<div class="side-item"><b>${escapeHtml(p.title)}</b><br><span class="muted">${escapeHtml(p.type)} - ${formatDate(p.createdAt)}</span></div>`).join('') : '<div class="side-item muted">Belum ada trending.</div>';
     }
 
     function ambilAcak() {
-      if (!semuaData.length) {
-        elements.status.textContent = 'Data belum tersedia.';
-        return;
-      }
-
-      const index = Math.floor(Math.random() * semuaData.length);
-      tampilkanData([semuaData[index]]);
+      const posts = allPosts();
+      if (!posts.length) return;
+      const post = posts[Math.floor(Math.random() * posts.length)];
+      currentFilter = 'semua';
+      el.search.value = post.title;
+      render();
     }
 
-    function csvKeObjek(csvText) {
+    function compressImage(file, maxWidth, quality) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => {
+            const scale = Math.min(1, maxWidth / img.width);
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = reject;
+          img.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function csvToObjects(csvText) {
       const rows = parseCsv(csvText).filter(row => row.some(cell => String(cell).trim() !== ''));
-
-      if (rows.length < 2) {
-        return [];
-      }
-
-      const headers = rows[0].map(header => String(header).trim().toLowerCase());
-
+      if (rows.length < 2) return [];
+      const headers = rows[0].map(h => String(h).trim().toLowerCase());
       return rows.slice(1).map(row => {
         const item = {};
-
-        headers.forEach((header, index) => {
-          item[header] = row[index] || '';
-        });
-
-        return {
-          id: String(item.id || '').trim(),
-          sesenggak: String(item.sesenggak || '').trim(),
-          arti: String(item.arti || '').trim(),
-          makna: String(item.makna || '').trim(),
-          kategori: String(item.kategori || '').trim(),
-          sumber: String(item.sumber || '').trim(),
-          aktif: item.aktif
-        };
+        headers.forEach((header, index) => item[header] = row[index] || '');
+        return item;
       });
     }
 
     function parseCsv(text) {
       const rows = [];
-      let row = [];
-      let value = '';
-      let insideQuotes = false;
-
+      let row = [], value = '', quoted = false;
       for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        const next = text[i + 1];
-
-        if (char === '"') {
-          if (insideQuotes && next === '"') {
-            value += '"';
-            i++;
-          } else {
-            insideQuotes = !insideQuotes;
-          }
-        } else if (char === ',' && !insideQuotes) {
-          row.push(value);
-          value = '';
-        } else if ((char === '\n' || char === '\r') && !insideQuotes) {
-          if (char === '\r' && next === '\n') {
-            i++;
-          }
-          row.push(value);
-          rows.push(row);
-          row = [];
-          value = '';
-        } else {
-          value += char;
-        }
+        const ch = text[i], next = text[i + 1];
+        if (ch === '"') {
+          if (quoted && next === '"') { value += '"'; i++; }
+          else quoted = !quoted;
+        } else if (ch === ',' && !quoted) { row.push(value); value = ''; }
+        else if ((ch === '\n' || ch === '\r') && !quoted) {
+          if (ch === '\r' && next === '\n') i++;
+          row.push(value); rows.push(row); row = []; value = '';
+        } else value += ch;
       }
-
-      if (value !== '' || row.length > 0) {
-        row.push(value);
-        rows.push(row);
-      }
-
+      if (value !== '' || row.length) { row.push(value); rows.push(row); }
       return rows;
     }
 
-    function tampilkanData(data) {
-      elements.list.innerHTML = '';
-
-      if (!data || data.length === 0) {
-        elements.status.textContent = 'Data tidak ditemukan. Pastikan sheet berisi data dan kolom aktif bernilai TRUE.';
-        return;
-      }
-
-      elements.status.textContent = 'Ditemukan ' + data.length + ' data.';
-
-      data.forEach(item => {
-        const card = document.createElement('article');
-        card.className = 'card';
-
-        card.innerHTML = `
-          <div class="sesenggak">${escapeHtml(item.sesenggak)}</div>
-          <div class="line"><span class="label">Arti:</span> ${escapeHtml(item.arti)}</div>
-          <div class="line"><span class="label">Makna:</span> ${escapeHtml(item.makna)}</div>
-          ${item.sumber ? `<div class="line"><span class="label">Sumber:</span> ${escapeHtml(item.sumber)}</div>` : ''}
-          ${item.kategori ? `<div class="kategori">${escapeHtml(item.kategori)}</div>` : ''}
-        `;
-
-        elements.list.appendChild(card);
-      });
+    function formatDate(value) {
+      try { return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)); }
+      catch { return ''; }
     }
 
     function escapeHtml(text) {
       return String(text || '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
+        .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;').replaceAll("'", '&#039;');
     }
 
-    elements.searchButton.addEventListener('click', cariData);
-    elements.randomButton.addEventListener('click', ambilAcak);
+    function slug(text) { return String(text || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || Date.now(); }
 
-    elements.searchInput.addEventListener('keyup', event => {
-      if (event.key === 'Enter') {
-        cariData();
-      }
+    document.querySelectorAll('[data-filter]').forEach(button => {
+      button.addEventListener('click', () => {
+        currentFilter = button.dataset.filter;
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.filter === currentFilter));
+        render();
+      });
     });
 
-    muatSheet();
+    document.getElementById('toUpload').addEventListener('click', () => el.uploadPanel.scrollIntoView({ behavior: 'smooth' }));
+    document.getElementById('randomButton').addEventListener('click', ambilAcak);
+    document.getElementById('clearLocalButton').addEventListener('click', () => {
+      if (!confirm('Hapus semua unggahan lokal di browser ini?')) return;
+      localPosts = []; likes = {}; comments = {}; saveState(); render();
+    });
+    el.cancelEdit.addEventListener('click', resetForm);
+    el.search.addEventListener('input', render);
+
+    loadState();
+    loadSheet();
   </script>
 </body>
 </html>
