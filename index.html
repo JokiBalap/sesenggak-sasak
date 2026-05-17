@@ -202,6 +202,12 @@
     .post-body { padding: 15px 16px 17px; }
     .headline { font-size: 22px; font-weight: 900; margin: 0 0 6px; color: var(--primary-dark); }
     .chip { display: inline-flex; border-radius: 999px; background: var(--soft); color: var(--primary-dark); padding: 4px 10px; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+    .badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 900; margin-left: 6px; }
+    .badge.admin { background: #fee2e2; color: #991b1b; }
+    .badge.visitor { background: #dcfce7; color: #166534; }
+    .identity { display: grid; grid-template-columns: minmax(180px, 1fr) auto auto; gap: 8px; margin-top: 16px; max-width: 720px; }
+    .admin-only { display: none; }
+    body.admin-mode .admin-only { display: inline-flex; }
     .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 13px; align-items: center; }
     .mini { padding: 8px 10px; font-size: 13px; border-radius: 999px; }
     .liked { background: var(--accent) !important; color: white !important; }
@@ -243,9 +249,15 @@
       <div>
         <h1>Media komunitas Sesenggak Sasak</h1>
         <p class="muted">Tampilan dibuat seperti gabungan Instagram dan website berita: bisa unggah foto, tulis berita, edit postingan, like, komentar, cari konten, dan ambil data Sesenggak dari Google Sheets.</p>
+        <div class="identity">
+          <input id="visitorNameInput" placeholder="Tulis nama Anda sebelum posting/komentar">
+          <button id="saveNameButton" class="ghost" type="button">Simpan nama</button>
+          <button id="adminLoginButton" class="ghost" type="button">Login admin</button>
+        </div>
+        <p id="identityStatus" class="muted">Mode: Pengunjung. Nama wajib diisi untuk posting dan komentar.</p>
         <div class="actions">
           <button id="randomButton" type="button">Acak Sesenggak</button>
-          <button id="clearLocalButton" class="ghost" type="button">Reset unggahan lokal</button>
+          <button id="clearLocalButton" class="ghost admin-only" type="button">Reset unggahan lokal</button>
         </div>
       </div>
       <div class="stats">
@@ -263,7 +275,7 @@
           <form id="postForm" class="form-grid">
             <input id="editId" type="hidden">
             <div class="two">
-              <input id="authorInput" placeholder="Nama penulis" value="Admin Sesenggak">
+              <input id="authorInput" placeholder="Nama penulis wajib diisi">
               <select id="typeInput">
                 <option value="berita">Berita</option>
                 <option value="foto">Foto</option>
@@ -300,7 +312,8 @@
         <h2>Panduan data</h2>
         <div class="side-list">
           <div class="side-item"><b>Google Sheets</b><br><span class="muted">Sesenggak lama tetap dibaca dari sheet.</span></div>
-          <div class="side-item"><b>Upload foto</b><br><span class="muted">Mode demo lokal di browser. Aman untuk prototype.</span></div>
+          <div class="side-item"><b>Admin & pengunjung</b><br><span class="muted">Postingan admin diberi badge merah. Pengunjung wajib menulis nama dan diberi badge hijau.</span></div>
+          <div class="side-item"><b>Reset unggahan</b><br><span class="muted">Tombol reset hanya muncul setelah login admin.</span></div>
           <div class="side-item"><b>Like & komentar</b><br><span class="muted">Tersimpan di perangkat pengunjung masing-masing.</span></div>
         </div>
       </aside>
@@ -314,6 +327,10 @@
     const STORAGE_KEY = 'sesenggak-news-posts-v1';
     const LIKE_KEY = 'sesenggak-news-likes-v1';
     const COMMENT_KEY = 'sesenggak-news-comments-v1';
+    const VISITOR_NAME_KEY = 'sesenggak-news-visitor-name-v1';
+    const ADMIN_SESSION_KEY = 'sesenggak-news-admin-session-v1';
+    const ADMIN_NAME = 'Admin Sesenggak';
+    const ADMIN_PIN = 'admin123';
 
     let sheetPosts = [];
     let localPosts = [];
@@ -321,6 +338,8 @@
     let comments = {};
     let currentFilter = 'semua';
     let currentImage = '';
+    let visitorName = '';
+    let isAdmin = false;
 
     const el = {
       search: document.getElementById('searchInput'),
@@ -340,19 +359,68 @@
       statPosts: document.getElementById('statPosts'),
       statLikes: document.getElementById('statLikes'),
       statSheet: document.getElementById('statSheet'),
-      trending: document.getElementById('trending')
+      trending: document.getElementById('trending'),
+      visitorName: document.getElementById('visitorNameInput'),
+      saveName: document.getElementById('saveNameButton'),
+      adminLogin: document.getElementById('adminLoginButton'),
+      identityStatus: document.getElementById('identityStatus')
     };
 
     function loadState() {
       localPosts = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
       likes = JSON.parse(localStorage.getItem(LIKE_KEY) || '{}');
       comments = JSON.parse(localStorage.getItem(COMMENT_KEY) || '{}');
+      visitorName = localStorage.getItem(VISITOR_NAME_KEY) || '';
+      isAdmin = localStorage.getItem(ADMIN_SESSION_KEY) === 'true';
+      el.visitorName.value = visitorName;
+      updateIdentityUI();
     }
 
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(localPosts));
       localStorage.setItem(LIKE_KEY, JSON.stringify(likes));
       localStorage.setItem(COMMENT_KEY, JSON.stringify(comments));
+      localStorage.setItem(VISITOR_NAME_KEY, visitorName);
+      localStorage.setItem(ADMIN_SESSION_KEY, String(isAdmin));
+    }
+
+    function updateIdentityUI() {
+      document.body.classList.toggle('admin-mode', isAdmin);
+      el.adminLogin.textContent = isAdmin ? 'Logout admin' : 'Login admin';
+      if (isAdmin) {
+        visitorName = ADMIN_NAME;
+        el.visitorName.value = ADMIN_NAME;
+        el.author.value = ADMIN_NAME;
+        el.identityStatus.textContent = 'Mode: Admin. Postingan dan komentar akan ditandai sebagai ADMIN.';
+      } else {
+        el.identityStatus.textContent = visitorName
+          ? 'Mode: Pengunjung. Anda menulis sebagai ' + visitorName + '.'
+          : 'Mode: Pengunjung. Nama wajib diisi untuk posting dan komentar.';
+        if (!el.author.value || el.author.value === ADMIN_NAME) {
+          el.author.value = visitorName;
+        }
+      }
+    }
+
+    function requireName() {
+      if (isAdmin) return ADMIN_NAME;
+      const name = el.visitorName.value.trim() || el.author.value.trim();
+      if (!name) {
+        alert('Silakan tulis nama Anda terlebih dahulu. Nama pengunjung wajib diisi.');
+        el.visitorName.focus();
+        return '';
+      }
+      if (name === ADMIN_NAME) {
+        alert('Nama Admin Sesenggak hanya boleh dipakai setelah login admin. Silakan gunakan nama pengunjung Anda.');
+        el.visitorName.focus();
+        return '';
+      }
+      visitorName = name;
+      el.visitorName.value = name;
+      el.author.value = name;
+      saveState();
+      updateIdentityUI();
+      return name;
     }
 
     async function loadSheet() {
@@ -368,6 +436,7 @@
             source: 'sheet',
             type: 'sesenggak',
             author: item.sumber || 'Google Sheets',
+            role: 'admin',
             title: item.sesenggak || 'Sesenggak Sasak',
             body: [item.arti, item.makna].filter(Boolean).join(' - '),
             category: item.kategori || 'sesenggak',
@@ -408,12 +477,14 @@
       const likeCount = Number(post.likeCount || 0) + (likes[post.id] ? 1 : 0);
       const comms = comments[post.id] || [];
       const canEdit = post.source !== 'sheet';
+      const role = post.role === 'admin' ? 'admin' : 'visitor';
+      const roleLabel = role === 'admin' ? 'ADMIN' : 'PENGUNJUNG';
       return `
         <article class="post" data-id="${escapeHtml(post.id)}">
           <div class="post-head">
             <div class="profile">
               <div class="avatar">${escapeHtml((post.author || 'A').slice(0, 1).toUpperCase())}</div>
-              <div class="truncate"><b>${escapeHtml(post.author || 'Anonim')}</b><span class="muted">${formatDate(post.createdAt)} - ${escapeHtml(post.type)}</span></div>
+              <div class="truncate"><b>${escapeHtml(post.author || 'Anonim')}</b><span class="badge ${role}">${roleLabel}</span><span class="muted">${formatDate(post.createdAt)} - ${escapeHtml(post.type)}</span></div>
             </div>
             ${canEdit ? `<div class="actions"><button class="mini ghost" onclick="editPost('${post.id}')">Edit</button><button class="mini danger" onclick="deletePost('${post.id}')">Hapus</button></div>` : ''}
           </div>
@@ -427,7 +498,7 @@
               <button class="mini ghost" onclick="sharePost('${post.id}')">Bagikan</button>
             </div>
             <div class="comments">
-              ${comms.slice(-3).map(c => `<div class="comment"><b>${escapeHtml(c.name)}:</b> ${escapeHtml(c.text)}</div>`).join('')}
+              ${comms.slice(-3).map(c => `<div class="comment"><b>${escapeHtml(c.name)}</b><span class="badge ${c.role === 'admin' ? 'admin' : 'visitor'}">${c.role === 'admin' ? 'ADMIN' : 'PENGUNJUNG'}</span>: ${escapeHtml(c.text)}</div>`).join('')}
               <div class="comment-form">
                 <input id="comment-${escapeHtml(post.id)}" placeholder="Tulis komentar...">
                 <button class="mini" onclick="addComment('${post.id}')">Kirim</button>
@@ -439,13 +510,16 @@
 
     el.postForm.addEventListener('submit', async event => {
       event.preventDefault();
+      const name = requireName();
+      if (!name) return;
       const id = el.editId.value || 'local-' + Date.now();
       const old = localPosts.find(p => p.id === id) || {};
       const post = {
         id,
         source: 'local',
         type: el.type.value,
-        author: el.author.value.trim() || 'Anonim',
+        author: isAdmin ? ADMIN_NAME : name,
+        role: isAdmin ? 'admin' : 'visitor',
         title: el.title.value.trim(),
         body: el.body.value.trim(),
         category: el.type.value,
@@ -508,7 +582,9 @@
       const text = input.value.trim();
       if (!text) return;
       comments[id] = comments[id] || [];
-      comments[id].push({ name: 'Pengunjung', text, at: new Date().toISOString() });
+      const name = requireName();
+      if (!name) return;
+      comments[id].push({ name: isAdmin ? ADMIN_NAME : name, role: isAdmin ? 'admin' : 'visitor', text, at: new Date().toISOString() });
       input.value = '';
       saveState();
       render();
@@ -523,7 +599,7 @@
 
     function resetForm() {
       el.postForm.reset();
-      el.author.value = 'Admin Sesenggak';
+      el.author.value = isAdmin ? ADMIN_NAME : visitorName;
       el.editId.value = '';
       currentImage = '';
       el.preview.removeAttribute('src');
@@ -626,7 +702,49 @@
 
     document.getElementById('toUpload').addEventListener('click', () => el.uploadPanel.scrollIntoView({ behavior: 'smooth' }));
     document.getElementById('randomButton').addEventListener('click', ambilAcak);
+    el.saveName.addEventListener('click', () => {
+      const name = el.visitorName.value.trim();
+      if (!name) {
+        alert('Nama tidak boleh kosong.');
+        el.visitorName.focus();
+        return;
+      }
+      if (name === ADMIN_NAME && !isAdmin) {
+        alert('Nama Admin Sesenggak hanya dipakai setelah login admin. Silakan gunakan nama pengunjung Anda.');
+        return;
+      }
+      visitorName = name;
+      el.author.value = name;
+      saveState();
+      updateIdentityUI();
+    });
+    el.adminLogin.addEventListener('click', () => {
+      if (isAdmin) {
+        isAdmin = false;
+        visitorName = '';
+        el.visitorName.value = '';
+        el.author.value = '';
+        saveState();
+        updateIdentityUI();
+        render();
+        return;
+      }
+      const pin = prompt('Masukkan PIN admin:');
+      if (pin !== ADMIN_PIN) {
+        alert('PIN admin salah. Anda tetap masuk sebagai pengunjung.');
+        return;
+      }
+      isAdmin = true;
+      visitorName = ADMIN_NAME;
+      saveState();
+      updateIdentityUI();
+      render();
+    });
     document.getElementById('clearLocalButton').addEventListener('click', () => {
+      if (!isAdmin) {
+        alert('Hanya admin yang bisa reset unggahan lokal.');
+        return;
+      }
       if (!confirm('Hapus semua unggahan lokal di browser ini?')) return;
       localPosts = []; likes = {}; comments = {}; saveState(); render();
     });

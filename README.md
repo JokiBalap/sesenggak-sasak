@@ -29,6 +29,9 @@ Header baris pertama:
 - Edit dan hapus postingan lokal.
 - Like postingan.
 - Komentar postingan.
+- Nama pengunjung wajib diisi sebelum posting/komentar.
+- Badge pembeda ADMIN dan PENGUNJUNG pada postingan/komentar.
+- Tombol reset unggahan lokal hanya muncul setelah login admin.
 - Tombol bagikan.
 - Filter: Semua, Berita, Foto, Sesenggak, Disukai.
 - Pencarian konten.
@@ -36,6 +39,26 @@ Header baris pertama:
 - Statistik postingan, like, dan jumlah data sheet.
 
 Catatan: fitur upload/like/komentar pada GitHub Pages bersifat lokal per browser. Untuk database publik bersama dibutuhkan backend.
+
+## Admin prototype
+
+Mode admin pada GitHub Pages ini hanya pembeda tampilan lokal, bukan keamanan backend sungguhan. PIN demo bawaan:
+
+```text
+admin123
+```
+
+Setelah login admin:
+
+- Nama otomatis menjadi `Admin Sesenggak`.
+- Postingan dan komentar diberi badge `ADMIN`.
+- Tombol `Reset unggahan lokal` muncul.
+
+Tanpa login admin:
+
+- Pengguna masuk sebagai `PENGUNJUNG`.
+- Nama wajib diisi sebelum posting atau komentar.
+- Pengunjung tidak bisa memakai nama `Admin Sesenggak`.
 
 ## Langkah setup singkat
 
