@@ -45,7 +45,7 @@ Catatan: fitur upload/like/komentar pada GitHub Pages bersifat lokal per browser
 Mode admin pada GitHub Pages ini hanya pembeda tampilan lokal, bukan keamanan backend sungguhan. PIN demo bawaan:
 
 ```text
-admin123
+K3mal@#$
 ```
 
 Setelah login admin:
