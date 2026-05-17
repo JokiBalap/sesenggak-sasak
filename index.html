@@ -201,7 +201,7 @@
       flex: 0 0 auto;
     }
     .profile b, .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
-    .post img.cover { width: 100%; display: block; max-height: 620px; object-fit: cover; background: var(--soft); }
+    .post img.cover, .post video.cover { width: 100%; display: block; max-height: 620px; object-fit: cover; background: var(--soft); }
     .post-body { padding: 15px 16px 17px; }
     .headline { font-size: 22px; font-weight: 900; margin: 0 0 6px; color: var(--primary-dark); }
     .chip { display: inline-flex; border-radius: 999px; background: var(--soft); color: var(--primary-dark); padding: 4px 10px; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
@@ -242,6 +242,7 @@
         <button class="ghost" data-filter="semua">Beranda</button>
         <button class="ghost" data-filter="berita">Berita</button>
         <button class="ghost" data-filter="foto">Foto</button>
+        <button class="ghost" data-filter="video">Video</button>
         <button id="toUpload" type="button">+ Upload</button>
         <button id="adminLoginButton" class="ghost" type="button">Login admin</button>
       </nav>
@@ -272,7 +273,7 @@
     <section class="layout">
       <div>
         <section id="uploadPanel" class="composer">
-          <h2 id="formTitle">Upload berita / foto</h2>
+          <h2 id="formTitle">Upload berita / foto / video</h2>
           <p class="muted">Untuk GitHub Pages, unggahan ini tersimpan di browser pengguna masing-masing (localStorage). Agar semua pengunjung bisa melihat upload publik yang sama, nanti perlu backend seperti Firebase/Supabase/Cloudinary.</p>
           <form id="postForm" class="form-grid">
             <input id="editId" type="hidden">
@@ -281,13 +282,16 @@
               <select id="typeInput">
                 <option value="berita">Berita</option>
                 <option value="foto">Foto</option>
+                <option value="video">Video</option>
                 <option value="sesenggak">Sesenggak</option>
               </select>
             </div>
             <input id="titleInput" required placeholder="Judul postingan / headline">
             <textarea id="bodyInput" required placeholder="Tulis isi berita, cerita foto, atau keterangan postingan..."></textarea>
             <input id="imageInput" type="file" accept="image/*">
+            <input id="videoInput" type="file" accept="video/*">
             <img id="imagePreview" class="preview" alt="Preview gambar">
+            <video id="videoPreview" class="preview" controls playsinline></video>
             <div class="actions">
               <button type="submit">Simpan postingan</button>
               <button id="cancelEditButton" class="ghost" type="button" style="display:none">Batal edit</button>
@@ -299,6 +303,7 @@
           <button class="tab active ghost" data-filter="semua">Semua</button>
           <button class="tab ghost" data-filter="berita">Berita</button>
           <button class="tab ghost" data-filter="foto">Foto</button>
+          <button class="tab ghost" data-filter="video">Video</button>
           <button class="tab ghost" data-filter="sesenggak">Sesenggak</button>
           <button class="tab ghost" data-filter="disukai">Disukai</button>
         </div>
@@ -341,6 +346,7 @@
     let comments = {};
     let currentFilter = 'semua';
     let currentImage = '';
+    let currentVideo = '';
     let visitorName = '';
     let currentUserId = '';
     let isAdmin = false;
@@ -356,7 +362,9 @@
       title: document.getElementById('titleInput'),
       body: document.getElementById('bodyInput'),
       image: document.getElementById('imageInput'),
+      video: document.getElementById('videoInput'),
       preview: document.getElementById('imagePreview'),
+      videoPreview: document.getElementById('videoPreview'),
       formTitle: document.getElementById('formTitle'),
       cancelEdit: document.getElementById('cancelEditButton'),
       uploadPanel: document.getElementById('uploadPanel'),
@@ -488,7 +496,7 @@
       }
 
       el.status.textContent = posts.length ? 'Menampilkan ' + posts.length + ' postingan.' : 'Belum ada postingan yang cocok.';
-      el.feed.innerHTML = posts.length ? posts.map(postTemplate).join('') : '<div class="empty">Belum ada data. Upload foto/berita baru atau cek Google Sheets.</div>';
+      el.feed.innerHTML = posts.length ? posts.map(postTemplate).join('') : '<div class="empty">Belum ada data. Upload foto/video/berita baru atau cek Google Sheets.</div>';
       renderStats();
       renderTrending();
     }
@@ -508,6 +516,7 @@
             ${manageButtons(post)}
           </div>
           ${post.image ? `<img class="cover" src="${post.image}" alt="${escapeHtml(post.title)}">` : ''}
+          ${post.video ? `<video class="cover" src="${post.video}" controls playsinline preload="metadata"></video>` : ''}
           <div class="post-body">
             <span class="chip">${escapeHtml(post.category || post.type)}</span>
             <h3 class="headline">${escapeHtml(post.title)}</h3>
@@ -548,7 +557,8 @@
         title: el.title.value.trim(),
         body: el.body.value.trim(),
         category: el.type.value,
-        image: currentImage || old.image || '',
+        image: currentVideo ? '' : (currentImage || old.image || ''),
+        video: currentVideo || old.video || '',
         likeCount: old.likeCount || 0,
         createdAt: old.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -566,8 +576,30 @@
       const file = el.image.files && el.image.files[0];
       if (!file) return;
       currentImage = await compressImage(file, 1280, .78);
+      currentVideo = '';
+      el.video.value = '';
       el.preview.src = currentImage;
       el.preview.style.display = 'block';
+      el.videoPreview.removeAttribute('src');
+      el.videoPreview.style.display = 'none';
+    });
+
+    el.video.addEventListener('change', async () => {
+      const file = el.video.files && el.video.files[0];
+      if (!file) return;
+      if (file.size > 20 * 1024 * 1024) {
+        alert('Ukuran video terlalu besar untuk mode GitHub Pages/localStorage. Pakai video maksimal sekitar 20 MB. Untuk video besar perlu backend seperti Laravel + storage.');
+        el.video.value = '';
+        return;
+      }
+      currentVideo = await fileToDataUrl(file);
+      currentImage = '';
+      el.image.value = '';
+      el.videoPreview.src = currentVideo;
+      el.videoPreview.style.display = 'block';
+      el.preview.removeAttribute('src');
+      el.preview.style.display = 'none';
+      if (el.type.value !== 'video') el.type.value = 'video';
     });
 
     function editPost(id) {
@@ -583,8 +615,11 @@
       el.title.value = post.title;
       el.body.value = post.body;
       currentImage = post.image || '';
+      currentVideo = post.video || '';
       el.preview.src = currentImage;
       el.preview.style.display = currentImage ? 'block' : 'none';
+      el.videoPreview.src = currentVideo;
+      el.videoPreview.style.display = currentVideo ? 'block' : 'none';
       el.formTitle.textContent = 'Edit postingan';
       el.cancelEdit.style.display = 'inline-flex';
       el.uploadPanel.scrollIntoView({ behavior: 'smooth' });
@@ -637,9 +672,12 @@
       el.author.value = isAdmin ? ADMIN_NAME : visitorName;
       el.editId.value = '';
       currentImage = '';
+      currentVideo = '';
       el.preview.removeAttribute('src');
+      el.videoPreview.removeAttribute('src');
       el.preview.style.display = 'none';
-      el.formTitle.textContent = 'Upload berita / foto';
+      el.videoPreview.style.display = 'none';
+      el.formTitle.textContent = 'Upload berita / foto / video';
       el.cancelEdit.style.display = 'none';
     }
 
@@ -662,6 +700,15 @@
       currentFilter = 'semua';
       el.search.value = post.title;
       render();
+    }
+
+    function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
     }
 
     function compressImage(file, maxWidth, quality) {

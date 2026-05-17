@@ -24,8 +24,8 @@ Header baris pertama:
 ## Fitur website
 
 - Beranda feed seperti media sosial.
-- Upload foto / berita dari browser.
-- Preview gambar sebelum simpan.
+- Upload foto / video / berita dari browser.
+- Preview gambar/video sebelum simpan.
 - Edit dan hapus postingan lokal hanya oleh admin atau pengunggah asli.
 - Like postingan.
 - Komentar postingan.
@@ -35,12 +35,12 @@ Header baris pertama:
 - Tombol login/logout admin berada di pojok kanan atas / topbar.
 - Scroll antarbagian memakai efek smooth.
 - Tombol bagikan.
-- Filter: Semua, Berita, Foto, Sesenggak, Disukai.
+- Filter: Semua, Berita, Foto, Video, Sesenggak, Disukai.
 - Pencarian konten.
 - Trending sidebar.
 - Statistik postingan, like, dan jumlah data sheet.
 
-Catatan: fitur upload/like/komentar pada GitHub Pages bersifat lokal per browser. Untuk database publik bersama dibutuhkan backend.
+Catatan: fitur upload/like/komentar pada GitHub Pages bersifat lokal per browser. Untuk database publik bersama dibutuhkan backend. Video disimpan sebagai data lokal browser, sehingga ukuran praktis dibatasi sekitar 20 MB per video; untuk video besar gunakan Laravel/storage/backend.
 
 ## Admin prototype
 
@@ -55,14 +55,14 @@ Setelah login admin:
 - Nama otomatis menjadi `Admin Sesenggak`.
 - Postingan dan komentar diberi badge `ADMIN`.
 - Tombol `Reset unggahan lokal` muncul.
-- Admin bisa mengedit dan menghapus semua unggahan lokal.
+- Admin bisa mengedit dan menghapus semua unggahan lokal, termasuk video.
 
 Tanpa login admin:
 
 - Pengguna masuk sebagai `PENGUNJUNG`.
 - Nama wajib diisi sebelum posting atau komentar.
 - Pengunjung tidak bisa memakai nama `Admin Sesenggak`.
-- Pengunjung hanya bisa mengedit atau menghapus unggahan yang dibuat dari browser/perangkatnya sendiri.
+- Pengunjung hanya bisa mengedit atau menghapus unggahan yang dibuat dari browser/perangkatnya sendiri, termasuk video.
 
 ## Langkah setup singkat
 
