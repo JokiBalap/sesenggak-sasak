@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sesenggak Sasak</title>
+  <meta name="description" content="Kumpulan sesenggak, peribahasa, pepatah, dan petuah Sasak.">
+  <style>
+    :root {
+      --bg: #f7f3ea;
+      --card: #ffffff;
+      --text: #2d2418;
+      --muted: #6f604e;
+      --primary: #7a4f24;
+      --primary-dark: #5f3d1b;
+      --chip: #efe2cc;
+      --border: #c9b99c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 24px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(32px, 6vw, 56px);
+      color: #4b2f15;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    input, select, button {
+      font-size: 16px;
+      border-radius: 10px;
+    }
+
+    input, select {
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text);
+      width: 100%;
+    }
+
+    button {
+      padding: 12px 18px;
+      border: 0;
+      background: var(--primary);
+      color: white;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      background: var(--primary-dark);
+    }
+
+    .status {
+      text-align: center;
+      color: var(--muted);
+      margin: 18px 0;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      border: 1px solid rgba(122, 79, 36, 0.08);
+    }
+
+    .sesenggak {
+      font-size: 23px;
+      font-weight: 700;
+      color: #4b2f15;
+      margin-bottom: 10px;
+    }
+
+    .line {
+      margin: 6px 0;
+    }
+
+    .label {
+      font-weight: 700;
+    }
+
+    .kategori {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 5px 11px;
+      background: var(--chip);
+      border-radius: 999px;
+      font-size: 13px;
+      color: #6b471f;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 36px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 16px;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Sesenggak Sasak</h1>
+      <p class="subtitle">Kumpulan peribahasa, pepatah, dan petuah Sasak</p>
+    </header>
+
+    <section class="toolbar" aria-label="Pencarian sesenggak">
+      <input id="searchInput" type="search" placeholder="Cari sesenggak, arti, makna, kategori..." autocomplete="off">
+      <button id="searchButton" type="button">Cari</button>
+      <button id="randomButton" type="button">Acak</button>
+    </section>
+
+    <div id="status" class="status">Memuat data...</div>
+    <section id="list" class="grid" aria-live="polite"></section>
+
+    <footer>
+      Data dimuat dari Google Sheets melalui Google Apps Script.
+    </footer>
+  </main>
+
+  <script>
+    const API_URL = 'GANTI_DENGAN_URL_WEB_APP_APPS_SCRIPT_ANDA';
+
+    const elements = {
+      searchInput: document.getElementById('searchInput'),
+      searchButton: document.getElementById('searchButton'),
+      randomButton: document.getElementById('randomButton'),
+      status: document.getElementById('status'),
+      list: document.getElementById('list')
+    };
+
+    async function ambilData(options = {}) {
+      const { q = '', random = false } = options;
+
+      elements.status.textContent = random ? 'Mengambil sesenggak acak...' : 'Memuat data...';
+      elements.list.innerHTML = '';
+
+      try {
+        if (!API_URL || API_URL.includes('GANTI_DENGAN_URL')) {
+          throw new Error('API_URL belum diganti dengan URL Web App Apps Script.');
+        }
+
+        const url = new URL(API_URL);
+
+        if (q) {
+          url.searchParams.set('q', q);
+        }
+
+        if (random) {
+          url.searchParams.set('random', '1');
+        }
+
+        const response = await fetch(url.toString());
+        const result = await response.json();
+
+        if (result.status !== 'success') {
+          throw new Error(result.message || 'Terjadi kesalahan saat memuat data.');
+        }
+
+        tampilkanData(result.data);
+      } catch (error) {
+        elements.status.textContent = 'Gagal memuat data: ' + error.message;
+      }
+    }
+
+    function tampilkanData(data) {
+      elements.list.innerHTML = '';
+
+      if (!data || data.length === 0) {
+        elements.status.textContent = 'Data tidak ditemukan.';
+        return;
+      }
+
+      elements.status.textContent = 'Ditemukan ' + data.length + ' data.';
+
+      data.forEach(item => {
+        const card = document.createElement('article');
+        card.className = 'card';
+
+        card.innerHTML = `
+          <div class="sesenggak">${escapeHtml(item.sesenggak)}</div>
+          <div class="line"><span class="label">Arti:</span> ${escapeHtml(item.arti)}</div>
+          <div class="line"><span class="label">Makna:</span> ${escapeHtml(item.makna)}</div>
+          ${item.sumber ? `<div class="line"><span class="label">Sumber:</span> ${escapeHtml(item.sumber)}</div>` : ''}
+          ${item.kategori ? `<div class="kategori">${escapeHtml(item.kategori)}</div>` : ''}
+        `;
+
+        elements.list.appendChild(card);
+      });
+    }
+
+    function escapeHtml(text) {
+      return String(text || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    elements.searchButton.addEventListener('click', () => {
+      ambilData({ q: elements.searchInput.value.trim() });
+    });
+
+    elements.randomButton.addEventListener('click', () => {
+      ambilData({ random: true });
+    });
+
+    elements.searchInput.addEventListener('keyup', event => {
+      if (event.key === 'Enter') {
+        ambilData({ q: elements.searchInput.value.trim() });
+      }
+    });
+
+    ambilData();
+  </script>
+</body>
+</html>
