@@ -32,6 +32,8 @@ Header baris pertama:
 - Nama pengunjung wajib diisi sebelum posting/komentar.
 - Badge pembeda ADMIN dan PENGUNJUNG pada postingan/komentar.
 - Tombol reset unggahan lokal hanya muncul setelah login admin.
+- Tombol login/logout admin berada di pojok kanan atas / topbar.
+- Scroll antarbagian memakai efek smooth.
 - Tombol bagikan.
 - Filter: Semua, Berita, Foto, Sesenggak, Disukai.
 - Pencarian konten.

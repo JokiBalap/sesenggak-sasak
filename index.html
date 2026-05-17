@@ -20,6 +20,7 @@
     }
 
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
@@ -41,6 +42,7 @@
       background: rgba(250, 247, 241, .94);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--line);
+      box-shadow: 0 8px 24px rgba(62, 40, 20, .08);
     }
 
     .topbar-inner {
@@ -118,6 +120,7 @@
     .danger:hover { background: #8f1b13; }
 
     .hero {
+      scroll-margin-top: 96px;
       margin: 22px 0;
       padding: 28px;
       border-radius: 28px;
@@ -168,7 +171,7 @@
     .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
     .tab.active { background: var(--primary-dark); color: white; }
 
-    .composer { margin-bottom: 18px; }
+    .composer { margin-bottom: 18px; scroll-margin-top: 96px; }
     .form-grid { display: grid; gap: 12px; }
     .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .preview {
@@ -205,7 +208,7 @@
     .badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 900; margin-left: 6px; }
     .badge.admin { background: #fee2e2; color: #991b1b; }
     .badge.visitor { background: #dcfce7; color: #166534; }
-    .identity { display: grid; grid-template-columns: minmax(180px, 1fr) auto auto; gap: 8px; margin-top: 16px; max-width: 720px; }
+    .identity { display: grid; grid-template-columns: minmax(180px, 1fr) auto; gap: 8px; margin-top: 16px; max-width: 720px; }
     .admin-only { display: none; }
     body.admin-mode .admin-only { display: inline-flex; }
     .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 13px; align-items: center; }
@@ -226,7 +229,7 @@
     @media (max-width: 880px) {
       .topbar-inner { grid-template-columns: 1fr; }
       .nav { justify-content: flex-start; }
-      .hero, .layout, .two { grid-template-columns: 1fr; }
+      .hero, .layout, .two, .identity { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -240,6 +243,7 @@
         <button class="ghost" data-filter="berita">Berita</button>
         <button class="ghost" data-filter="foto">Foto</button>
         <button id="toUpload" type="button">+ Upload</button>
+        <button id="adminLoginButton" class="ghost" type="button">Login admin</button>
       </nav>
     </div>
   </div>
@@ -251,7 +255,6 @@
         <div class="identity">
           <input id="visitorNameInput" placeholder="Tulis nama Anda sebelum posting/komentar">
           <button id="saveNameButton" class="ghost" type="button">Simpan nama</button>
-          <button id="adminLoginButton" class="ghost" type="button">Login admin</button>
         </div>
         <p id="identityStatus" class="muted">Mode: Pengunjung. Nama wajib diisi untuk posting dan komentar.</p>
         <div class="actions">
@@ -395,7 +398,7 @@
         visitorName = ADMIN_NAME;
         el.visitorName.value = ADMIN_NAME;
         el.author.value = ADMIN_NAME;
-        el.identityStatus.textContent = 'Mode: Admin. Postingan dan komentar akan ditandai sebagai ADMIN.';
+        el.identityStatus.textContent = 'Mode: Admin';
       } else {
         el.identityStatus.textContent = visitorName
           ? 'Mode: Pengunjung. Anda menulis sebagai ' + visitorName + '.'
