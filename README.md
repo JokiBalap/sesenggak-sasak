@@ -2,7 +2,7 @@
 
 Website publik sederhana untuk menampilkan kumpulan Sesenggak Sasak.
 
-Data utama disimpan di Google Sheets, dibaca melalui Google Apps Script, lalu ditampilkan oleh frontend statis yang bisa di-hosting gratis di GitHub Pages.
+Data utama disimpan di Google Sheets dan dibaca langsung oleh frontend statis melalui endpoint CSV publik Google Sheets. Cara ini tidak membutuhkan Google Apps Script, cocok jika OAuth/otorisasi Apps Script diblokir.
 
 ## Struktur Google Sheets
 
@@ -23,45 +23,28 @@ Header baris pertama:
 
 ## Langkah setup singkat
 
-1. Buat Google Sheets.
-2. Buat tab bernama `Sesenggak`.
+1. Buka Google Sheets:
+   `https://docs.google.com/spreadsheets/d/1Ax3bgECT91TG6f4xSsTHOlJdRgMeATjZxUsTSsbIfPQ/edit`
+2. Pastikan tab bernama `Sesenggak`.
 3. Isi header dan data awal.
-4. Salin Spreadsheet ID dari URL Google Sheets.
-5. Buka Extensions > Apps Script.
-6. Tempel isi `appsscript/Code.gs`.
-7. Ganti `GANTI_DENGAN_SPREADSHEET_ID_ANDA` dengan Spreadsheet ID.
-8. Deploy sebagai Web App:
-   - Execute as: Me
-   - Who has access: Anyone
-9. Salin Web App URL yang berakhiran `/exec`.
-10. Ganti `GANTI_DENGAN_URL_WEB_APP_APPS_SCRIPT_ANDA` di `index.html`.
-11. Upload repo ini ke GitHub dan aktifkan GitHub Pages.
+4. Pastikan kolom `aktif` berisi `TRUE` untuk data yang ingin tampil.
+5. Klik Share / Bagikan.
+6. Ubah akses menjadi `Anyone with the link` / `Siapa saja yang memiliki link`.
+7. Role harus `Viewer` / `Pelihat`.
+8. Website GitHub Pages akan membaca data langsung dari sheet tersebut.
 
-## Contoh URL API
-
-Semua data aktif:
+## URL Google Sheets yang dipakai frontend
 
 ```text
-https://script.google.com/macros/s/ID_DEPLOYMENT/exec
+https://docs.google.com/spreadsheets/d/1Ax3bgECT91TG6f4xSsTHOlJdRgMeATjZxUsTSsbIfPQ/gviz/tq?tqx=out:csv&sheet=Sesenggak
 ```
 
-Cari kata:
+Jika data tidak muncul di website, penyebab paling umum:
 
-```text
-https://script.google.com/macros/s/ID_DEPLOYMENT/exec?q=hidup
-```
-
-Kategori:
-
-```text
-https://script.google.com/macros/s/ID_DEPLOYMENT/exec?kategori=nasihat
-```
-
-Data acak:
-
-```text
-https://script.google.com/macros/s/ID_DEPLOYMENT/exec?random=1
-```
+- Sheet belum dibagikan sebagai `Anyone with the link`.
+- Nama tab bukan persis `Sesenggak`.
+- Header kolom tidak sesuai.
+- Kolom `aktif` belum bernilai `TRUE`.
 
 ## Catatan keamanan
 

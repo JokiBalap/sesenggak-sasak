@@ -168,12 +168,13 @@
     <section id="list" class="grid" aria-live="polite"></section>
 
     <footer>
-      Data dimuat dari Google Sheets melalui Google Apps Script.
+      Data dimuat langsung dari Google Sheets.
     </footer>
   </main>
 
   <script>
-    const API_URL = 'GANTI_DENGAN_URL_WEB_APP_APPS_SCRIPT_ANDA';
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Ax3bgECT91TG6f4xSsTHOlJdRgMeATjZxUsTSsbIfPQ/gviz/tq?tqx=out:csv&sheet=Sesenggak';
+    let semuaData = [];
 
     const elements = {
       searchInput: document.getElementById('searchInput'),
@@ -183,45 +184,134 @@
       list: document.getElementById('list')
     };
 
-    async function ambilData(options = {}) {
-      const { q = '', random = false } = options;
-
-      elements.status.textContent = random ? 'Mengambil sesenggak acak...' : 'Memuat data...';
+    async function muatSheet() {
+      elements.status.textContent = 'Memuat data dari Google Sheets...';
       elements.list.innerHTML = '';
 
       try {
-        if (!API_URL || API_URL.includes('GANTI_DENGAN_URL')) {
-          throw new Error('API_URL belum diganti dengan URL Web App Apps Script.');
+        const response = await fetch(SHEET_CSV_URL + '&_=' + Date.now());
+
+        if (!response.ok) {
+          throw new Error('Google Sheets belum bisa dibaca publik. Aktifkan Share: Anyone with the link Viewer.');
         }
 
-        const url = new URL(API_URL);
+        const csvText = await response.text();
+        semuaData = csvKeObjek(csvText)
+          .filter(item => String(item.aktif).toLowerCase() === 'true');
 
-        if (q) {
-          url.searchParams.set('q', q);
-        }
-
-        if (random) {
-          url.searchParams.set('random', '1');
-        }
-
-        const response = await fetch(url.toString());
-        const result = await response.json();
-
-        if (result.status !== 'success') {
-          throw new Error(result.message || 'Terjadi kesalahan saat memuat data.');
-        }
-
-        tampilkanData(result.data);
+        tampilkanData(semuaData);
       } catch (error) {
         elements.status.textContent = 'Gagal memuat data: ' + error.message;
       }
+    }
+
+    function cariData() {
+      const q = elements.searchInput.value.trim().toLowerCase();
+
+      if (!q) {
+        tampilkanData(semuaData);
+        return;
+      }
+
+      const hasil = semuaData.filter(item => {
+        const gabungan = [
+          item.sesenggak,
+          item.arti,
+          item.makna,
+          item.kategori,
+          item.sumber
+        ].join(' ').toLowerCase();
+
+        return gabungan.includes(q);
+      });
+
+      tampilkanData(hasil);
+    }
+
+    function ambilAcak() {
+      if (!semuaData.length) {
+        elements.status.textContent = 'Data belum tersedia.';
+        return;
+      }
+
+      const index = Math.floor(Math.random() * semuaData.length);
+      tampilkanData([semuaData[index]]);
+    }
+
+    function csvKeObjek(csvText) {
+      const rows = parseCsv(csvText).filter(row => row.some(cell => String(cell).trim() !== ''));
+
+      if (rows.length < 2) {
+        return [];
+      }
+
+      const headers = rows[0].map(header => String(header).trim().toLowerCase());
+
+      return rows.slice(1).map(row => {
+        const item = {};
+
+        headers.forEach((header, index) => {
+          item[header] = row[index] || '';
+        });
+
+        return {
+          id: String(item.id || '').trim(),
+          sesenggak: String(item.sesenggak || '').trim(),
+          arti: String(item.arti || '').trim(),
+          makna: String(item.makna || '').trim(),
+          kategori: String(item.kategori || '').trim(),
+          sumber: String(item.sumber || '').trim(),
+          aktif: item.aktif
+        };
+      });
+    }
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [];
+      let value = '';
+      let insideQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        if (char === '"') {
+          if (insideQuotes && next === '"') {
+            value += '"';
+            i++;
+          } else {
+            insideQuotes = !insideQuotes;
+          }
+        } else if (char === ',' && !insideQuotes) {
+          row.push(value);
+          value = '';
+        } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+          if (char === '\r' && next === '\n') {
+            i++;
+          }
+          row.push(value);
+          rows.push(row);
+          row = [];
+          value = '';
+        } else {
+          value += char;
+        }
+      }
+
+      if (value !== '' || row.length > 0) {
+        row.push(value);
+        rows.push(row);
+      }
+
+      return rows;
     }
 
     function tampilkanData(data) {
       elements.list.innerHTML = '';
 
       if (!data || data.length === 0) {
-        elements.status.textContent = 'Data tidak ditemukan.';
+        elements.status.textContent = 'Data tidak ditemukan. Pastikan sheet berisi data dan kolom aktif bernilai TRUE.';
         return;
       }
 
@@ -252,21 +342,16 @@
         .replaceAll("'", '&#039;');
     }
 
-    elements.searchButton.addEventListener('click', () => {
-      ambilData({ q: elements.searchInput.value.trim() });
-    });
-
-    elements.randomButton.addEventListener('click', () => {
-      ambilData({ random: true });
-    });
+    elements.searchButton.addEventListener('click', cariData);
+    elements.randomButton.addEventListener('click', ambilAcak);
 
     elements.searchInput.addEventListener('keyup', event => {
       if (event.key === 'Enter') {
-        ambilData({ q: elements.searchInput.value.trim() });
+        cariData();
       }
     });
 
-    ambilData();
+    muatSheet();
   </script>
 </body>
 </html>
