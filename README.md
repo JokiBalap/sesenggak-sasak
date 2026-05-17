@@ -26,7 +26,7 @@ Header baris pertama:
 - Beranda feed seperti media sosial.
 - Upload foto / berita dari browser.
 - Preview gambar sebelum simpan.
-- Edit dan hapus postingan lokal.
+- Edit dan hapus postingan lokal hanya oleh admin atau pengunggah asli.
 - Like postingan.
 - Komentar postingan.
 - Nama pengunjung wajib diisi sebelum posting/komentar.
@@ -53,12 +53,14 @@ Setelah login admin:
 - Nama otomatis menjadi `Admin Sesenggak`.
 - Postingan dan komentar diberi badge `ADMIN`.
 - Tombol `Reset unggahan lokal` muncul.
+- Admin bisa mengedit dan menghapus semua unggahan lokal.
 
 Tanpa login admin:
 
 - Pengguna masuk sebagai `PENGUNJUNG`.
 - Nama wajib diisi sebelum posting atau komentar.
 - Pengunjung tidak bisa memakai nama `Admin Sesenggak`.
+- Pengunjung hanya bisa mengedit atau menghapus unggahan yang dibuat dari browser/perangkatnya sendiri.
 
 ## Langkah setup singkat
 

@@ -327,6 +327,7 @@
     const LIKE_KEY = 'sesenggak-news-likes-v1';
     const COMMENT_KEY = 'sesenggak-news-comments-v1';
     const VISITOR_NAME_KEY = 'sesenggak-news-visitor-name-v1';
+    const USER_ID_KEY = 'sesenggak-news-user-id-v1';
     const ADMIN_SESSION_KEY = 'sesenggak-news-admin-session-v1';
     const ADMIN_NAME = 'Admin Sesenggak';
     const ADMIN_PIN = 'K3mal@#$';
@@ -338,6 +339,7 @@
     let currentFilter = 'semua';
     let currentImage = '';
     let visitorName = '';
+    let currentUserId = '';
     let isAdmin = false;
 
     const el = {
@@ -370,6 +372,8 @@
       likes = JSON.parse(localStorage.getItem(LIKE_KEY) || '{}');
       comments = JSON.parse(localStorage.getItem(COMMENT_KEY) || '{}');
       visitorName = localStorage.getItem(VISITOR_NAME_KEY) || '';
+      currentUserId = localStorage.getItem(USER_ID_KEY) || ('visitor-' + Date.now() + '-' + Math.random().toString(36).slice(2));
+      localStorage.setItem(USER_ID_KEY, currentUserId);
       isAdmin = localStorage.getItem(ADMIN_SESSION_KEY) === 'true';
       el.visitorName.value = visitorName;
       updateIdentityUI();
@@ -380,6 +384,7 @@
       localStorage.setItem(LIKE_KEY, JSON.stringify(likes));
       localStorage.setItem(COMMENT_KEY, JSON.stringify(comments));
       localStorage.setItem(VISITOR_NAME_KEY, visitorName);
+      localStorage.setItem(USER_ID_KEY, currentUserId);
       localStorage.setItem(ADMIN_SESSION_KEY, String(isAdmin));
     }
 
@@ -420,6 +425,19 @@
       saveState();
       updateIdentityUI();
       return name;
+    }
+
+    function canManagePost(post) {
+      if (!post || post.source === 'sheet') return false;
+      if (isAdmin) return true;
+      if (post.role === 'admin') return false;
+      if (post.ownerId) return post.ownerId === currentUserId;
+      return Boolean(visitorName && post.author === visitorName);
+    }
+
+    function manageButtons(post) {
+      if (!canManagePost(post)) return '';
+      return `<div class="actions"><button class="mini ghost" onclick="editPost('${post.id}')">Edit</button><button class="mini danger" onclick="deletePost('${post.id}')">Hapus</button></div>`;
     }
 
     async function loadSheet() {
@@ -475,7 +493,6 @@
     function postTemplate(post) {
       const likeCount = Number(post.likeCount || 0) + (likes[post.id] ? 1 : 0);
       const comms = comments[post.id] || [];
-      const canEdit = post.source !== 'sheet';
       const role = post.role === 'admin' ? 'admin' : 'visitor';
       const roleLabel = role === 'admin' ? 'ADMIN' : 'PENGUNJUNG';
       return `
@@ -485,7 +502,7 @@
               <div class="avatar">${escapeHtml((post.author || 'A').slice(0, 1).toUpperCase())}</div>
               <div class="truncate"><b>${escapeHtml(post.author || 'Anonim')}</b><span class="badge ${role}">${roleLabel}</span><span class="muted">${formatDate(post.createdAt)} - ${escapeHtml(post.type)}</span></div>
             </div>
-            ${canEdit ? `<div class="actions"><button class="mini ghost" onclick="editPost('${post.id}')">Edit</button><button class="mini danger" onclick="deletePost('${post.id}')">Hapus</button></div>` : ''}
+            ${manageButtons(post)}
           </div>
           ${post.image ? `<img class="cover" src="${post.image}" alt="${escapeHtml(post.title)}">` : ''}
           <div class="post-body">
@@ -513,9 +530,15 @@
       if (!name) return;
       const id = el.editId.value || 'local-' + Date.now();
       const old = localPosts.find(p => p.id === id) || {};
+      if (el.editId.value && !canManagePost(old)) {
+        alert('Anda tidak punya izin mengedit postingan ini. Hanya admin atau pengunggah asli yang bisa mengedit.');
+        resetForm();
+        return;
+      }
       const post = {
         id,
         source: 'local',
+        ownerId: old.ownerId || (isAdmin ? 'admin' : currentUserId),
         type: el.type.value,
         author: isAdmin ? ADMIN_NAME : name,
         role: isAdmin ? 'admin' : 'visitor',
@@ -547,6 +570,10 @@
     function editPost(id) {
       const post = localPosts.find(p => p.id === id);
       if (!post) return;
+      if (!canManagePost(post)) {
+        alert('Anda tidak punya izin mengedit postingan ini. Hanya admin atau pengunggah asli yang bisa mengedit.');
+        return;
+      }
       el.editId.value = post.id;
       el.author.value = post.author;
       el.type.value = post.type;
@@ -561,6 +588,12 @@
     }
 
     function deletePost(id) {
+      const post = localPosts.find(p => p.id === id);
+      if (!post) return;
+      if (!canManagePost(post)) {
+        alert('Anda tidak punya izin menghapus postingan ini. Hanya admin atau pengunggah asli yang bisa menghapus.');
+        return;
+      }
       if (!confirm('Hapus postingan ini?')) return;
       localPosts = localPosts.filter(p => p.id !== id);
       delete likes[id];
